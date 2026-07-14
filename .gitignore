@@ -1,0 +1,79 @@
+# Obsidian 工作区状态（频繁变动，不需要版本控制）
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json
+
+# Smart Connections 向量索引（体积大，可再生）
+.smart-env/
+
+# macOS 系统文件
+.DS_Store
+**/.DS_Store
+
+# 临时文件
+.trash/
+*.tmp
+*API*密钥*.md
+
+# 密钥与账号台账（本地自管，绝不入库）
+*API key*.md
+*账号管理*.md
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# MCP 配置（含密钥）
+.mcp.json
+
+# Claude 本机配置与 Cron 运行状态（仅提交示例配置）
+.claude/settings.json
+.claude/scheduled_tasks.json
+.claude/scheduled_tasks.lock
+
+# 浏览器会话文件（含登录凭证）
+cookies.json
+
+# 大型二进制文件（不进 Git，避免仓库膨胀）
+# 幻灯片 - PPT/PPTX
+*.ppt
+*.pptx
+
+# PDF（课件/文档体积大，本地自用不入库）
+*.pdf
+*.PDF
+
+# 音视频
+*.mp3
+*.mp4
+*.mov
+*.avi
+*.wav
+*.m4a
+*.wmv
+
+# 设计源文件
+*.psd
+*.ai
+*.sketch
+
+# 压缩包
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tgz
+
+# 工具自动生成的锁文件
+skills-lock.json
+
+# 安装包/磁盘映像
+*.dmg
+*.exe
+*.msi
+*.pkg
+
+# sub2api OpenAI 账号池
+sub2api_split/
+sub2api_split.tar.gz

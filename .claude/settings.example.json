@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash AI协作工具/hooks/cron-refresh.sh",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "bash AI协作工具/hooks/workbench-prep.sh",
+            "timeout": 10,
+            "statusMessage": "工作台准备中..."
+          }
+        ]
+      }
+    ]
+  }
+}

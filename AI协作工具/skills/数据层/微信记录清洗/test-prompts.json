@@ -1,0 +1,4 @@
+[
+  {"id": 1, "prompt": "素材箱/_待处理/有个新的WeFlow_20260611.txt，帮我清洗一下", "expected": "执行Layer 1结构清洗+Layer 2语义过滤，保留教练指导和技术问答，原地重写并保存.bak"},
+  {"id": 2, "prompt": "清洗WeFlow记录", "expected": "检查素材箱是否有待处理的WeFlow .txt文件，有则清洗，没有则告知"}
+]

@@ -1,0 +1,1654 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eef3f8">
+  <meta name="description" content="个人工作台分享库：让人、AI 与知识库共同工作，让 AI 有上下文、有记忆、有流程，也能持续维护你的知识网络。">
+  <meta property="og:title" content="开始链接｜个人工作台分享库">
+  <meta property="og:description" content="把知识库从文件仓库，变成 AI 可调用的个人认知接口。">
+  <meta property="og:type" content="website">
+  <title>开始链接｜让 AI 真正认识你，也记得你</title>
+  <style>
+    :root {
+      --paper: #eef3f8;
+      --paper-2: #f8fafc;
+      --ink: #192037;
+      --muted: #65708a;
+      --line: #cbd5e2;
+      --line-strong: #9aa8bd;
+      --link: #13a88c;
+      --link-soft: #c7f0e7;
+      --start: #f26452;
+      --start-soft: #ffe0da;
+      --signal: #6563df;
+      --signal-soft: #dddcff;
+      --blue: #2768d8;
+      --shadow: 0 20px 60px rgba(30, 49, 79, .12);
+      --radius-sm: 12px;
+      --radius: 22px;
+      --radius-lg: 34px;
+      --display: "HarmonyOS Sans SC", "Source Han Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --body: "LXGW WenKai Screen", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --mono: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--paper);
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 13% 7%, rgba(101, 99, 223, .12), transparent 29rem),
+        radial-gradient(circle at 92% 17%, rgba(19, 168, 140, .11), transparent 24rem),
+        var(--paper);
+      font-family: var(--body);
+      line-height: 1.72;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection { background: var(--link-soft); color: var(--ink); }
+
+    a { color: inherit; }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    :focus-visible {
+      outline: 3px solid var(--signal);
+      outline-offset: 4px;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 99;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: white;
+      transform: translateY(-160%);
+      transition: transform .2s ease;
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .page-grid {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .42;
+      background-image:
+        linear-gradient(rgba(91, 110, 141, .09) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(91, 110, 141, .09) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: linear-gradient(to bottom, black, transparent 78%);
+      z-index: -1;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 40px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(154, 168, 189, .42);
+      background: rgba(238, 243, 248, .82);
+      backdrop-filter: blur(18px);
+    }
+
+    .nav {
+      min-height: 66px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      text-decoration: none;
+      font-family: var(--display);
+      font-weight: 820;
+      letter-spacing: -.03em;
+    }
+
+    .brand-mark {
+      width: 29px;
+      height: 29px;
+      position: relative;
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border: 3px solid var(--ink);
+      border-radius: 50%;
+    }
+
+    .brand-mark::before { top: 2px; left: 2px; }
+    .brand-mark::after { right: 2px; bottom: 2px; border-color: var(--start); }
+
+    .brand-mark span {
+      width: 19px;
+      height: 3px;
+      border-radius: 4px;
+      background: var(--link);
+      transform: rotate(45deg);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 14px;
+      font-family: var(--display);
+      font-weight: 650;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      transition: color .2s ease;
+    }
+
+    .nav-links a:hover { color: var(--ink); }
+
+    .nav-cta {
+      padding: 9px 15px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      color: var(--ink) !important;
+      background: rgba(255,255,255,.5);
+    }
+
+    .hero {
+      min-height: calc(100vh - 66px);
+      display: grid;
+      grid-template-columns: 1.06fr .94fr;
+      align-items: center;
+      gap: 58px;
+      padding-block: 70px 84px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 22px;
+      color: var(--muted);
+      font: 700 12px/1 var(--mono);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 28px;
+      height: 2px;
+      background: var(--start);
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+
+    h1 {
+      margin-bottom: 26px;
+      max-width: 780px;
+      font-family: var(--display);
+      font-size: clamp(48px, 6.4vw, 94px);
+      line-height: .98;
+      letter-spacing: -.068em;
+      font-weight: 900;
+    }
+
+    h1 .link-word {
+      color: var(--link);
+      position: relative;
+      white-space: nowrap;
+    }
+
+    h1 .link-word::after {
+      content: "";
+      position: absolute;
+      left: .04em;
+      right: -.02em;
+      bottom: -.03em;
+      height: .09em;
+      border-radius: 99px;
+      background: var(--start);
+      transform: rotate(-1.2deg);
+    }
+
+    .hero-lede {
+      max-width: 660px;
+      margin-bottom: 31px;
+      color: #4f5b73;
+      font-size: clamp(18px, 2vw, 23px);
+      line-height: 1.68;
+    }
+
+    .hero-lede strong { color: var(--ink); }
+
+    .hero-actions {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .button {
+      min-height: 50px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 21px;
+      border: 1px solid var(--ink);
+      border-radius: 14px;
+      background: var(--ink);
+      color: white;
+      text-decoration: none;
+      font-family: var(--display);
+      font-weight: 750;
+      cursor: pointer;
+      box-shadow: 0 8px 0 rgba(25, 32, 55, .13);
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 11px 0 rgba(25, 32, 55, .13);
+    }
+
+    .button.secondary { background: transparent; color: var(--ink); box-shadow: none; }
+    .button.secondary:hover { background: rgba(255,255,255,.58); }
+
+    .button svg { width: 18px; height: 18px; }
+
+    .hero-note {
+      margin-top: 24px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font: 600 12px/1.4 var(--mono);
+    }
+
+    .hero-note span::before { content: "✓"; margin-right: 6px; color: var(--link); }
+
+    .network-stage {
+      min-height: 570px;
+      position: relative;
+      isolation: isolate;
+      border: 1px solid rgba(154, 168, 189, .8);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.82), rgba(227,235,246,.72)),
+        var(--paper-2);
+      box-shadow: var(--shadow);
+    }
+
+    .network-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle, rgba(70, 91, 123, .19) 1.2px, transparent 1.2px);
+      background-size: 22px 22px;
+      z-index: -1;
+    }
+
+    .stage-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 21px 24px;
+      border-bottom: 1px solid var(--line);
+      font: 700 11px/1 var(--mono);
+      letter-spacing: .1em;
+      color: var(--muted);
+    }
+
+    .live-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--link);
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 0 6px rgba(19,168,140,.12);
+      animation: pulse 2.3s ease-out infinite;
+    }
+
+    .network-svg {
+      width: 100%;
+      height: 488px;
+      display: block;
+    }
+
+    .network-line {
+      stroke: #93a2b8;
+      stroke-width: 1.4;
+      stroke-dasharray: 5 7;
+      opacity: .75;
+    }
+
+    .network-line.primary {
+      stroke: var(--link);
+      stroke-width: 2.5;
+      stroke-dasharray: 7 7;
+      animation: dash 12s linear infinite;
+    }
+
+    .network-node {
+      filter: drop-shadow(0 7px 12px rgba(28, 42, 68, .12));
+    }
+
+    .orbit-dot { animation: orbitPulse 2.8s ease-in-out infinite; }
+    .orbit-dot.delay-1 { animation-delay: -.8s; }
+    .orbit-dot.delay-2 { animation-delay: -1.6s; }
+
+    .stage-caption {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 20px;
+      pointer-events: none;
+    }
+
+    .stage-caption strong {
+      display: block;
+      max-width: 280px;
+      font-family: var(--display);
+      font-size: 19px;
+      line-height: 1.35;
+      letter-spacing: -.02em;
+    }
+
+    .stage-caption code {
+      padding: 6px 9px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(248,250,252,.85);
+      color: var(--muted);
+      font: 11px/1 var(--mono);
+    }
+
+    .manifesto {
+      padding: 24px 0 106px;
+    }
+
+    .manifesto-card {
+      display: grid;
+      grid-template-columns: .72fr 1.28fr;
+      gap: 60px;
+      align-items: start;
+      padding: 56px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-lg);
+      background: var(--ink);
+      color: white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .manifesto-card::after {
+      content: "LINK";
+      position: absolute;
+      right: -22px;
+      bottom: -47px;
+      font: 900 160px/.8 var(--display);
+      letter-spacing: -.08em;
+      color: rgba(255,255,255,.035);
+    }
+
+    .manifesto-label {
+      color: #9ee5d8;
+      font: 700 12px/1.5 var(--mono);
+      letter-spacing: .12em;
+    }
+
+    .manifesto-quote {
+      margin: 0;
+      position: relative;
+      z-index: 1;
+      font-family: var(--display);
+      font-size: clamp(30px, 4vw, 56px);
+      line-height: 1.16;
+      letter-spacing: -.045em;
+      font-weight: 820;
+    }
+
+    .manifesto-quote em { color: #69e1c7; font-style: normal; }
+
+    section { scroll-margin-top: 88px; }
+
+    .section {
+      padding: 104px 0;
+      border-top: 1px solid rgba(154, 168, 189, .44);
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: .72fr 1.28fr;
+      gap: 60px;
+      align-items: end;
+      margin-bottom: 58px;
+    }
+
+    .section-kicker {
+      margin: 0;
+      color: var(--link);
+      font: 750 12px/1 var(--mono);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin-bottom: 17px;
+      font-family: var(--display);
+      font-size: clamp(36px, 5vw, 66px);
+      line-height: 1.05;
+      letter-spacing: -.056em;
+      font-weight: 880;
+    }
+
+    .section-intro {
+      max-width: 730px;
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 18px;
+    }
+
+    .difference-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .difference-card {
+      min-height: 385px;
+      padding: 35px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: rgba(248,250,252,.72);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .difference-card.problem { background: #e5eaf0; color: #5e6878; }
+    .difference-card.solution { background: #dff3ee; color: var(--ink); }
+
+    .card-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 34px;
+      padding: 6px 9px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font: 700 11px/1 var(--mono);
+      letter-spacing: .08em;
+    }
+
+    .difference-card h3 {
+      max-width: 460px;
+      margin-bottom: 14px;
+      font-family: var(--display);
+      font-size: clamp(26px, 3vw, 39px);
+      line-height: 1.15;
+      letter-spacing: -.04em;
+    }
+
+    .difference-card p { max-width: 470px; font-size: 16px; }
+
+    .forgetting-list {
+      position: absolute;
+      left: 34px;
+      right: 34px;
+      bottom: 28px;
+      display: grid;
+      gap: 9px;
+      font: 12px/1.5 var(--mono);
+    }
+
+    .forgetting-list span {
+      padding: 8px 11px;
+      border-left: 3px solid #97a2b2;
+      background: rgba(255,255,255,.32);
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+    }
+
+    .memory-orbit {
+      position: absolute;
+      width: 215px;
+      height: 215px;
+      right: -22px;
+      bottom: -45px;
+      border: 1px solid rgba(19,168,140,.45);
+      border-radius: 50%;
+    }
+
+    .memory-orbit::before,
+    .memory-orbit::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(19,168,140,.32);
+    }
+
+    .memory-orbit::before { inset: 31px; }
+    .memory-orbit::after { inset: 68px; background: var(--link); box-shadow: 0 0 0 12px rgba(19,168,140,.12); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      position: relative;
+    }
+
+    .flow::before {
+      content: "";
+      position: absolute;
+      top: 39px;
+      left: 8%;
+      right: 8%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--signal), var(--link), var(--start));
+    }
+
+    .flow-step {
+      padding: 0 14px;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .flow-marker {
+      width: 78px;
+      height: 78px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 22px;
+      border: 2px solid var(--ink);
+      border-radius: 24px;
+      background: var(--paper-2);
+      color: var(--ink);
+      font: 850 17px/1 var(--mono);
+      transform: rotate(3deg);
+      box-shadow: 7px 7px 0 rgba(25,32,55,.09);
+    }
+
+    .flow-step:nth-child(even) .flow-marker { transform: rotate(-3deg); }
+    .flow-step:nth-child(3) .flow-marker { background: var(--link-soft); border-color: var(--link); }
+    .flow-step:nth-child(5) .flow-marker { background: var(--start-soft); border-color: var(--start); }
+
+    .flow-step h3 {
+      margin-bottom: 8px;
+      font: 800 18px/1.2 var(--display);
+      letter-spacing: -.02em;
+    }
+
+    .flow-step p { margin-bottom: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+
+    .system-map {
+      display: grid;
+      grid-template-columns: .86fr 1.14fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .map-legend {
+      padding: 34px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.55);
+    }
+
+    .map-legend h3 {
+      margin-bottom: 24px;
+      font: 820 25px/1.25 var(--display);
+      letter-spacing: -.03em;
+    }
+
+    .legend-list { display: grid; gap: 12px; }
+
+    .legend-item {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 15px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .legend-item:last-child { border-bottom: 0; }
+
+    .legend-index {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: var(--ink);
+      color: white;
+      font: 700 11px/1 var(--mono);
+    }
+
+    .legend-item strong { display: block; margin-bottom: 4px; font-family: var(--display); }
+    .legend-item span { color: var(--muted); font-size: 14px; }
+
+    .stack {
+      min-height: 575px;
+      display: flex;
+      flex-direction: column;
+      justify-content: end;
+      gap: 13px;
+      padding: 28px;
+      border-radius: var(--radius);
+      background: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .stack-layer {
+      position: relative;
+      padding: 23px 25px;
+      border-radius: 16px;
+      color: white;
+      overflow: hidden;
+      transition: transform .25s ease;
+    }
+
+    .stack-layer:hover { transform: translateX(-5px); }
+    .stack-layer:nth-child(1) { width: 76%; background: #40405f; }
+    .stack-layer:nth-child(2) { width: 84%; background: #5553bd; }
+    .stack-layer:nth-child(3) { width: 92%; background: #188c78; }
+    .stack-layer:nth-child(4) { width: 100%; background: #e85e4c; }
+
+    .stack-layer small { display: block; margin-bottom: 7px; opacity: .72; font: 700 10px/1 var(--mono); letter-spacing: .1em; }
+    .stack-layer strong { display: block; font: 820 19px/1.2 var(--display); }
+    .stack-layer span { display: block; margin-top: 6px; font-size: 13px; opacity: .78; }
+
+    .skill-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .skill-column {
+      min-height: 495px;
+      padding: 28px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: rgba(248,250,252,.7);
+    }
+
+    .skill-column.operations { border-top: 7px solid var(--link); }
+    .skill-column.data { border-top: 7px solid var(--signal); }
+    .skill-column.framework { border-top: 7px solid var(--start); }
+
+    .skill-column .column-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      color: var(--muted);
+      font: 700 11px/1 var(--mono);
+      letter-spacing: .08em;
+    }
+
+    .skill-column h3 {
+      margin-bottom: 10px;
+      font: 850 30px/1.1 var(--display);
+      letter-spacing: -.035em;
+    }
+
+    .skill-column > p { min-height: 76px; color: var(--muted); font-size: 14px; }
+
+    .skill-list { display: grid; gap: 9px; margin-top: 22px; }
+
+    .skill-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(255,255,255,.58);
+      font-size: 13px;
+    }
+
+    .skill-item::after { content: "↗"; color: var(--muted); font-family: var(--mono); }
+
+    .proof-strip {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: 1.3fr .7fr .7fr;
+      gap: 18px;
+    }
+
+    .proof {
+      min-height: 150px;
+      padding: 26px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,.6);
+    }
+
+    .proof strong {
+      display: block;
+      margin-bottom: 8px;
+      font: 860 clamp(32px, 4vw, 51px)/1 var(--display);
+      letter-spacing: -.05em;
+    }
+
+    .proof span { color: var(--muted); font-size: 14px; }
+
+    .card-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .note-card {
+      position: relative;
+      padding: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #fbfcfe;
+      box-shadow: 12px 12px 0 rgba(25,32,55,.07);
+    }
+
+    .note-card::before {
+      content: "CARD / 001";
+      position: absolute;
+      top: 19px;
+      right: 22px;
+      color: var(--muted);
+      font: 700 10px/1 var(--mono);
+      letter-spacing: .1em;
+    }
+
+    .frontmatter {
+      padding: 14px 16px;
+      margin-bottom: 27px;
+      border-left: 3px solid var(--signal);
+      background: #eff0ff;
+      color: #56568c;
+      white-space: pre-line;
+      font: 12px/1.65 var(--mono);
+    }
+
+    .note-card h3 {
+      font: 850 30px/1.2 var(--display);
+      letter-spacing: -.035em;
+    }
+
+    .note-card p { color: #556079; }
+    .wikilink { color: var(--link); font-weight: 750; text-decoration: none; border-bottom: 1px solid currentColor; }
+
+    .graph-card {
+      min-height: 480px;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: var(--ink);
+      color: white;
+    }
+
+    .graph-card svg { width: 100%; height: 100%; position: absolute; inset: 0; }
+
+    .graph-caption {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 26px;
+      z-index: 2;
+    }
+
+    .graph-caption small { color: #8fd8cb; font: 700 11px/1 var(--mono); letter-spacing: .1em; }
+    .graph-caption h3 { margin: 8px 0 0; font: 800 25px/1.3 var(--display); letter-spacing: -.025em; }
+
+    .audience-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .audience-card {
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 25px;
+      border: 1px solid var(--line-strong);
+      border-radius: 18px;
+      background: rgba(248,250,252,.72);
+      transition: transform .25s ease, background .25s ease;
+    }
+
+    .audience-card:hover { transform: translateY(-5px); background: white; }
+    .audience-icon { font: 800 32px/1 var(--mono); color: var(--signal); }
+    .audience-card:nth-child(2) .audience-icon { color: var(--link); }
+    .audience-card:nth-child(3) .audience-icon { color: var(--start); }
+    .audience-card:nth-child(4) .audience-icon { color: var(--blue); }
+    .audience-card h3 { margin-bottom: 9px; font: 820 20px/1.25 var(--display); }
+    .audience-card p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+
+    .quickstart {
+      display: grid;
+      grid-template-columns: .75fr 1.25fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .start-copy {
+      padding: 35px;
+      border-radius: var(--radius);
+      background: var(--start-soft);
+      border: 1px solid #efaa9f;
+    }
+
+    .start-copy .step-badge {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 42px;
+      border-radius: 50%;
+      background: var(--start);
+      color: white;
+      font: 800 14px/1 var(--mono);
+    }
+
+    .start-copy h3 { font: 850 34px/1.15 var(--display); letter-spacing: -.04em; }
+    .start-copy p { color: #78554f; }
+
+    .terminal {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+      border-radius: var(--radius);
+      background: #11182b;
+      color: #edf1f7;
+      box-shadow: var(--shadow);
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      padding: 15px 18px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      color: #8f9bb2;
+      font: 700 11px/1 var(--mono);
+    }
+
+    .terminal-dots { display: flex; gap: 7px; }
+    .terminal-dots i { width: 9px; height: 9px; border-radius: 50%; background: #f06a59; }
+    .terminal-dots i:nth-child(2) { background: #e8b54c; }
+    .terminal-dots i:nth-child(3) { background: #4dc69f; }
+
+    .copy-btn {
+      border: 0;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.09);
+      color: #dfe6f1;
+      font: 700 11px/1 var(--mono);
+      cursor: pointer;
+    }
+
+    .copy-btn:hover { background: rgba(255,255,255,.16); }
+
+    .terminal pre {
+      flex: 1;
+      margin: 0;
+      padding: 28px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font: 14px/1.85 var(--mono);
+    }
+
+    .prompt { color: #62dbc0; }
+    .command { color: #f4d37c; }
+    .comment { color: #75829b; }
+
+    .route {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+
+    .route-card {
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.52);
+    }
+
+    .route-card strong { display: block; margin-bottom: 7px; font-family: var(--display); }
+    .route-card span { color: var(--muted); font-size: 13px; }
+
+    .repo-tree {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .tree-panel {
+      padding: 26px;
+      border-radius: var(--radius);
+      background: #192037;
+      color: #e8edf5;
+      overflow-x: auto;
+    }
+
+    .tree-panel pre { margin: 0; font: 13px/1.8 var(--mono); }
+    .tree-accent { color: #68ddc5; }
+    .tree-start { color: #ff907f; }
+    .tree-muted { color: #7f8ca6; }
+
+    .repo-notes {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .repo-note {
+      padding: 24px;
+      border: 1px solid var(--line-strong);
+      border-radius: 16px;
+      background: rgba(255,255,255,.58);
+    }
+
+    .repo-note strong { display: block; margin-bottom: 8px; font: 800 18px/1.25 var(--display); }
+    .repo-note p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    .limits {
+      display: grid;
+      grid-template-columns: .76fr 1.24fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .limit-title {
+      position: sticky;
+      top: 100px;
+      padding: 31px;
+      border-radius: var(--radius);
+      background: var(--signal-soft);
+      border: 1px solid #b4b3e6;
+    }
+
+    .limit-title h3 { font: 850 33px/1.18 var(--display); letter-spacing: -.04em; }
+    .limit-title p { margin: 0; color: #5b5b87; }
+
+    .faq-list { display: grid; gap: 12px; }
+
+    details {
+      border: 1px solid var(--line-strong);
+      border-radius: 15px;
+      background: rgba(255,255,255,.58);
+      overflow: hidden;
+    }
+
+    summary {
+      padding: 21px 23px;
+      cursor: pointer;
+      list-style: none;
+      font: 780 17px/1.45 var(--display);
+      position: relative;
+    }
+
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; position: absolute; right: 22px; color: var(--link); font: 700 23px/1 var(--mono); }
+    details[open] summary::after { content: "−"; }
+
+    details p {
+      padding: 0 23px 22px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .final-cta {
+      padding: 110px 0 78px;
+    }
+
+    .cta-card {
+      position: relative;
+      overflow: hidden;
+      padding: 70px 58px;
+      border-radius: var(--radius-lg);
+      background: var(--link);
+      color: #071e1a;
+      box-shadow: var(--shadow);
+    }
+
+    .cta-card::before {
+      content: "";
+      position: absolute;
+      width: 430px;
+      height: 430px;
+      right: -120px;
+      top: -175px;
+      border: 62px solid rgba(255,255,255,.13);
+      border-radius: 50%;
+    }
+
+    .cta-card h2 { max-width: 800px; margin-bottom: 18px; }
+    .cta-card p { max-width: 700px; color: #0b2924; font-size: 18px; }
+    .cta-card .eyebrow { color: #0b2924; }
+    .cta-card .button { position: relative; z-index: 1; margin-top: 12px; }
+
+    footer {
+      padding: 28px 0 46px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .footer-inner { display: flex; justify-content: space-between; gap: 24px; align-items: center; }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 18px; }
+    .footer-links a { text-decoration: none; }
+    .footer-links a:hover { color: var(--ink); }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .65s ease, transform .65s ease;
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(19,168,140,.33); }
+      65%, 100% { box-shadow: 0 0 0 11px rgba(19,168,140,0); }
+    }
+
+    @keyframes dash { to { stroke-dashoffset: -180; } }
+
+    @keyframes orbitPulse {
+      0%, 100% { opacity: .55; transform: scale(.9); transform-origin: center; }
+      50% { opacity: 1; transform: scale(1.18); transform-origin: center; }
+    }
+
+    @media (max-width: 980px) {
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .network-stage { min-height: 520px; }
+      .manifesto-card, .section-head, .system-map, .quickstart, .repo-tree, .limits { grid-template-columns: 1fr; }
+      .manifesto-card { gap: 24px; }
+      .section-head { gap: 18px; align-items: start; }
+      .skill-board { grid-template-columns: 1fr; }
+      .skill-column { min-height: 0; }
+      .skill-column > p { min-height: 0; }
+      .audience-grid { grid-template-columns: 1fr 1fr; }
+      .limit-title { position: static; }
+    }
+
+    @media (max-width: 760px) {
+      .container { width: min(100% - 24px, 1180px); }
+      .nav { min-height: 58px; }
+      .nav-links a:not(.nav-cta) { display: none; }
+      .hero { padding-block: 56px 62px; gap: 38px; }
+      h1 { font-size: clamp(46px, 15vw, 68px); }
+      .network-stage { min-height: 455px; border-radius: 24px; }
+      .network-svg { height: 385px; }
+      .stage-caption { display: none; }
+      .manifesto { padding-bottom: 72px; }
+      .manifesto-card { padding: 32px 26px; }
+      .section { padding: 78px 0; }
+      .section-head { margin-bottom: 40px; }
+      .difference-grid, .card-demo, .proof-strip, .repo-notes { grid-template-columns: 1fr; }
+      .difference-card { min-height: 350px; padding: 27px; }
+      .flow { grid-template-columns: 1fr; gap: 18px; }
+      .flow::before { top: 20px; bottom: 20px; left: 30px; width: 2px; height: auto; right: auto; }
+      .flow-step { display: grid; grid-template-columns: 64px 1fr; text-align: left; gap: 15px; padding: 0; }
+      .flow-marker { width: 60px; height: 60px; margin: 0; border-radius: 18px; }
+      .flow-step p { grid-column: 2; margin-top: -36px; }
+      .stack { min-height: 500px; padding: 18px; }
+      .stack-layer:nth-child(n) { width: 100%; }
+      .audience-grid, .route { grid-template-columns: 1fr; }
+      .audience-card { min-height: 210px; }
+      .start-copy, .terminal pre { padding: 24px; }
+      .cta-card { padding: 48px 27px; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="page-grid" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="container nav">
+      <a class="brand" href="#top" aria-label="工作台分享库首页">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>工作台分享库</span>
+      </a>
+      <nav class="nav-links" aria-label="主导航">
+        <a href="#why">为什么</a>
+        <a href="#system">系统</a>
+        <a href="#skills">Skill</a>
+        <a href="#start">开始</a>
+        <a class="nav-cta" href="https://github.com/readercyl/workbench-linkstart">GitHub ↗</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="container hero" id="top">
+      <div>
+        <p class="eyebrow">Human × AI × Knowledge</p>
+        <h1>让 AI 真正<br><span class="link-word">认识你</span>，也记得你。</h1>
+        <p class="hero-lede">
+          这个仓库分享一套可研究、可迁移的个人工作台方法与文件结构。它用<strong>协议、知识卡片、双向链接、Skill 和维护脚本</strong>，把每次从零开始的 AI 对话，变成一段会积累的长期协作。
+        </p>
+        <div class="hero-actions">
+          <a class="button" href="#start">
+            立即开始链接
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <a class="button secondary" href="原理/工作台方法论.md">读完整方法论</a>
+        </div>
+        <div class="hero-note" aria-label="项目特点">
+          <span>Markdown 文件优先</span>
+          <span>Claude Code / Codex</span>
+          <span>面向分享的通用版本</span>
+        </div>
+      </div>
+
+      <div class="network-stage" aria-label="人、AI 和知识库协作网络示意图">
+        <div class="stage-head">
+          <span>WORKBENCH / KNOWLEDGE GRAPH</span>
+          <span class="live-state"><i class="live-dot"></i> LINK ONLINE</span>
+        </div>
+        <svg class="network-svg" viewBox="0 0 560 488" role="img" aria-labelledby="network-title network-desc">
+          <title id="network-title">人、AI 与知识库构成协作三角</title>
+          <desc id="network-desc">人物档案、对话、项目和外部素材进入知识卡片网络，由 AI 检索并继续维护。</desc>
+          <line class="network-line primary" x1="280" y1="116" x2="144" y2="326"/>
+          <line class="network-line primary" x1="280" y1="116" x2="424" y2="326"/>
+          <line class="network-line primary" x1="144" y1="326" x2="424" y2="326"/>
+          <line class="network-line" x1="280" y1="116" x2="93" y2="135"/>
+          <line class="network-line" x1="280" y1="116" x2="461" y2="126"/>
+          <line class="network-line" x1="144" y1="326" x2="63" y2="255"/>
+          <line class="network-line" x1="424" y1="326" x2="497" y2="247"/>
+          <line class="network-line" x1="144" y1="326" x2="244" y2="405"/>
+          <line class="network-line" x1="424" y1="326" x2="334" y2="417"/>
+
+          <g class="network-node">
+            <circle cx="280" cy="116" r="61" fill="#192037"/>
+            <circle cx="280" cy="116" r="70" fill="none" stroke="#6563df" stroke-opacity=".42"/>
+            <text x="280" y="108" fill="white" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="800">AI</text>
+            <text x="280" y="130" fill="#aeb9ce" text-anchor="middle" font-family="monospace" font-size="9">CONTEXT + ACTION</text>
+          </g>
+          <g class="network-node">
+            <rect x="88" y="270" width="112" height="112" rx="32" fill="#f26452"/>
+            <text x="144" y="318" fill="#251411" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="800">你</text>
+            <text x="144" y="340" fill="#6a2b23" text-anchor="middle" font-family="monospace" font-size="9">GOAL + JUDGMENT</text>
+          </g>
+          <g class="network-node">
+            <rect x="368" y="270" width="112" height="112" rx="56" fill="#13a88c"/>
+            <text x="424" y="318" fill="#061e19" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="800">知识库</text>
+            <text x="424" y="340" fill="#0a5548" text-anchor="middle" font-family="monospace" font-size="9">MEMORY + LINKS</text>
+          </g>
+
+          <g fill="#f8fafc" stroke="#9aa8bd">
+            <circle class="orbit-dot" cx="93" cy="135" r="22"/>
+            <circle class="orbit-dot delay-1" cx="461" cy="126" r="22"/>
+            <circle class="orbit-dot delay-2" cx="63" cy="255" r="19"/>
+            <circle class="orbit-dot" cx="497" cy="247" r="19"/>
+            <circle class="orbit-dot delay-1" cx="244" cy="405" r="19"/>
+            <circle class="orbit-dot delay-2" cx="334" cy="417" r="19"/>
+          </g>
+          <g fill="#65708a" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="700">
+            <text x="93" y="139">档案</text>
+            <text x="461" y="130">对话</text>
+            <text x="63" y="259">目标</text>
+            <text x="497" y="251">卡片</text>
+            <text x="244" y="409">项目</text>
+            <text x="334" y="421">素材</text>
+          </g>
+        </svg>
+        <div class="stage-caption">
+          <strong>三者共享同一份上下文，协作才会越用越顺手。</strong>
+          <code>protocol.status = active</code>
+        </div>
+      </div>
+    </section>
+
+    <section class="manifesto container reveal" aria-label="核心理念">
+      <div class="manifesto-card">
+        <span class="manifesto-label">THE CORE IDEA<br>核心判断</span>
+        <blockquote class="manifesto-quote">知识库不该只是存东西的仓库。<br>它应该是 AI <em>随时可调用</em>的个人认知接口。</blockquote>
+      </div>
+    </section>
+
+    <section class="section" id="why">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">01 / Why</p>
+          <div>
+            <h2>普通 AI 对话，结束就失忆。</h2>
+            <p class="section-intro">你反复解释自己是谁、项目做到哪、哪些判断已经推翻。工作台把这些背景写进一套 AI 能读取、能执行、能继续维护的系统。</p>
+          </div>
+        </div>
+
+        <div class="difference-grid reveal">
+          <article class="difference-card problem">
+            <span class="card-label">WITHOUT WORKBENCH</span>
+            <h3>每场对话都像第一次见面。</h3>
+            <p>聊天记录散落，想法堆进文件夹，AI 只看到眼前这一小段。昨天做过的判断，今天还得再讲一遍。</p>
+            <div class="forgetting-list" aria-hidden="true">
+              <span>“我之前说过项目背景……”</span>
+              <span>“这条路上周已经否掉了……”</span>
+              <span>“你又忘了我的协作偏好。”</span>
+            </div>
+          </article>
+          <article class="difference-card solution">
+            <span class="card-label">WITH WORKBENCH</span>
+            <h3>上下文会沉淀，知识会继续长。</h3>
+            <p>人物档案提供你是谁，卡片网络提供你知道什么，运转日志提供发生过什么，协议告诉 AI 下一步该怎么做。</p>
+            <div class="memory-orbit" aria-hidden="true"></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="flow">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">02 / Flow</p>
+          <div>
+            <h2>从一条碎片，到一张会被用到的卡片。</h2>
+            <p class="section-intro">这条链路不以“存好了”为终点。真正的终点是：下一次遇到相关问题，AI 能找到它、理解它，并沿链接继续推导。</p>
+          </div>
+        </div>
+
+        <div class="flow reveal" aria-label="知识工作流">
+          <article class="flow-step">
+            <div class="flow-marker">IN</div>
+            <h3>收进素材箱</h3>
+            <p>文章、对话、灵感、视频笔记先进入统一入口。</p>
+          </article>
+          <article class="flow-step">
+            <div class="flow-marker">01</div>
+            <h3>去噪与提炼</h3>
+            <p>剥掉重复和废话，留下一个可独立理解的论点。</p>
+          </article>
+          <article class="flow-step">
+            <div class="flow-marker">↔</div>
+            <h3>建立双向链接</h3>
+            <p>新卡片接入旧知识，形成可导航的关系网络。</p>
+          </article>
+          <article class="flow-step">
+            <div class="flow-marker">AI</div>
+            <h3>检索与推导</h3>
+            <p>AI 沿链接找到上下文，不再只做关键词匹配。</p>
+          </article>
+          <article class="flow-step">
+            <div class="flow-marker">∞</div>
+            <h3>持续维护</h3>
+            <p>存档、日报、体检和审核防止系统慢慢腐化。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="system">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">03 / System</p>
+          <div>
+            <h2>它给 AI 的不只是一堆文件。</h2>
+            <p class="section-intro">这个分享库同时提供协作协议、个人上下文、知识网络和维护机制。四层咬合，AI 才能从“回答问题”走到“把事情持续做下去”。</p>
+          </div>
+        </div>
+
+        <div class="system-map reveal">
+          <aside class="map-legend">
+            <h3>工作台的四层结构</h3>
+            <div class="legend-list">
+              <div class="legend-item"><span class="legend-index">04</span><div><strong>行动层</strong><span>素材、项目、内容与对外分享，承接真实工作。</span></div></div>
+              <div class="legend-item"><span class="legend-index">03</span><div><strong>维护层</strong><span>13 个 Skill + Hook，让系统每天能运转、按需能体检。</span></div></div>
+              <div class="legend-item"><span class="legend-index">02</span><div><strong>知识层</strong><span>人物档案、原子卡片、MOC 与对话日志构成长期记忆。</span></div></div>
+              <div class="legend-item"><span class="legend-index">01</span><div><strong>协议层</strong><span>CLAUDE.md / AGENTS.md 规定 AI 如何理解、判断和行动。</span></div></div>
+            </div>
+          </aside>
+          <div class="stack" aria-label="工作台四层结构图">
+            <div class="stack-layer"><small>LAYER 04 / ACTION</small><strong>项目 · 内容 · 分享 · 素材</strong><span>所有方法最终都要回到真实任务。</span></div>
+            <div class="stack-layer"><small>LAYER 03 / MAINTENANCE</small><strong>运营层 · 数据层 · 框架层</strong><span>让知识可用，让流程可持续。</span></div>
+            <div class="stack-layer"><small>LAYER 02 / KNOWLEDGE</small><strong>关于我 · 卡片 · MOC · 日志</strong><span>AI 需要的背景、判断与历史。</span></div>
+            <div class="stack-layer"><small>LAYER 01 / PROTOCOL</small><strong>CLAUDE.md + AGENTS.md</strong><span>支持读取仓库与操作文件的 AI 可按协议接手。</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="skills">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">04 / Maintenance</p>
+          <div>
+            <h2>13 个 Skill，分三层守住系统。</h2>
+            <p class="section-intro">知识库会长大，也会长歪。运营层管每天，数据层管知识，框架层管规则和工具；职责分开，出了问题才知道该修哪里。</p>
+          </div>
+        </div>
+
+        <div class="skill-board reveal">
+          <article class="skill-column operations">
+            <div class="column-meta"><span>DAILY</span><span>4 SKILLS</span></div>
+            <h3>运营层</h3>
+            <p>记录每天发生了什么，形成可回看的时间线，并检查日常运转是否断档。</p>
+            <div class="skill-list">
+              <span class="skill-item">对话存档</span>
+              <span class="skill-item">日报</span>
+              <span class="skill-item">周复盘</span>
+              <span class="skill-item">运营层巡检</span>
+            </div>
+          </article>
+          <article class="skill-column data">
+            <div class="column-meta"><span>ON DEMAND</span><span>5 SKILLS</span></div>
+            <h3>数据层</h3>
+            <p>把外部信息编译为知识，沿网络检索，并发现死链、孤立卡片、重复内容等质量问题。</p>
+            <div class="skill-list">
+              <span class="skill-item">知识编译</span>
+              <span class="skill-item">知识检索</span>
+              <span class="skill-item">数据层体检</span>
+              <span class="skill-item">对话深度整理</span>
+              <span class="skill-item">微信记录清洗</span>
+            </div>
+          </article>
+          <article class="skill-column framework">
+            <div class="column-meta"><span>STRUCTURAL</span><span>4 SKILLS</span></div>
+            <h3>框架层</h3>
+            <p>结构变更后检查全系统一致性，管理工具，并把用户纠正反写进协作机制。</p>
+            <div class="skill-list">
+              <span class="skill-item">框架层审核</span>
+              <span class="skill-item">工具管理</span>
+              <span class="skill-item">工具自修正</span>
+              <span class="skill-item">全系统诊断</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="proof-strip reveal" aria-label="仓库内容统计">
+          <div class="proof"><strong>全链路</strong><span>从素材进入，到卡片被检索，再到全系统维护。</span></div>
+          <div class="proof"><strong>11</strong><span>张通用示例卡片，用于观察卡片格式与 WikiLink 写法。</span></div>
+          <div class="proof"><strong>1 MOC</strong><span>主题地图示例，展示知识如何从卡片长成网络。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="cards">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">05 / Atomic Notes</p>
+          <div>
+            <h2>每张卡片，只说清一件事。</h2>
+            <p class="section-intro">标题就是核心论点，正文能独立读懂，链接自然嵌入语义。这样写不是为了排版洁癖，是为了让 AI 更准确地检索和组合。</p>
+          </div>
+        </div>
+
+        <div class="card-demo reveal">
+          <article class="note-card">
+            <div class="frontmatter">---
+created: 2026-07-14
+source_type: 对话
+status: seed
+---</div>
+            <h3>标题即核心论点</h3>
+            <p>正文只承载一个可独立理解的认知。它和 <a class="wikilink" href="02-知识卡片/MOC/MOC-知识管理.md">[[相关主题]]</a> 自然连接，也保留原始来源。</p>
+            <p><strong>相关链接：</strong><br><a class="wikilink" href="02-知识卡片/index.md">[[知识卡片索引]]</a>　<a class="wikilink" href="原理/工作台方法论.md">[[工作台方法论]]</a></p>
+          </article>
+          <article class="graph-card">
+            <svg viewBox="0 0 580 480" role="img" aria-label="卡片连接为知识网络的示意图">
+              <g stroke="#6f7f9c" stroke-width="1.2" opacity=".64">
+                <line x1="287" y1="205" x2="138" y2="102"/><line x1="287" y1="205" x2="447" y2="110"/>
+                <line x1="287" y1="205" x2="118" y2="280"/><line x1="287" y1="205" x2="448" y2="292"/>
+                <line x1="138" y1="102" x2="73" y2="190"/><line x1="138" y1="102" x2="248" y2="62"/>
+                <line x1="447" y1="110" x2="505" y2="195"/><line x1="118" y1="280" x2="213" y2="356"/>
+                <line x1="448" y1="292" x2="360" y2="365"/>
+              </g>
+              <g fill="#26304c" stroke="#8f9bb2"><circle cx="138" cy="102" r="25"/><circle cx="447" cy="110" r="25"/><circle cx="118" cy="280" r="22"/><circle cx="448" cy="292" r="22"/><circle cx="73" cy="190" r="14"/><circle cx="248" cy="62" r="15"/><circle cx="505" cy="195" r="14"/><circle cx="213" cy="356" r="15"/><circle cx="360" cy="365" r="15"/></g>
+              <circle cx="287" cy="205" r="52" fill="#13a88c"/>
+              <circle cx="287" cy="205" r="65" fill="none" stroke="#61d7c0" stroke-opacity=".38" class="orbit-dot"/>
+              <text x="287" y="200" text-anchor="middle" fill="#071e1a" font-family="sans-serif" font-size="14" font-weight="800">核心论点</text>
+              <text x="287" y="221" text-anchor="middle" fill="#0b5549" font-family="monospace" font-size="9">ATOMIC NOTE</text>
+            </svg>
+            <div class="graph-caption"><small>LINKS CREATE CONTEXT</small><h3>单张卡片保存判断，卡片之间的关系保存你的思考方式。</h3></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="for-whom">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">06 / For Whom</p>
+          <div>
+            <h2>适合想和 AI 长期协作的人。</h2>
+            <p class="section-intro">它不是万能笔记软件，也不会替你思考。它更像一套可读、可改、可迁移的协作基础设施。</p>
+          </div>
+        </div>
+
+        <div class="audience-grid reveal">
+          <article class="audience-card"><span class="audience-icon">⌘</span><div><h3>Claude Code / Codex 用户</h3><p>让 AI 直接读协议、操作文件、执行 Skill，不必每次重新解释。</p></div></article>
+          <article class="audience-card"><span class="audience-icon">↔</span><div><h3>知识管理实践者</h3><p>把碎片笔记变成能被检索、组合和持续维护的知识网络。</p></div></article>
+          <article class="audience-card"><span class="audience-icon">△</span><div><h3>讲师与内容创作者</h3><p>用一套透明的目录和流程，带学生或读者从零复刻。</p></div></article>
+          <article class="audience-card"><span class="audience-icon">◎</span><div><h3>AI 协作研究者</h3><p>研究人、AI、知识库如何分工，以及机制怎样替代临时提示词。</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="start">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">07 / Quick Start</p>
+          <div>
+            <h2>把链接交给 AI，先跑起来。</h2>
+            <p class="section-intro">最省事的启动方式，是让你的 AI 克隆仓库、读取根协议，再用对话带你填完人物档案和第一张卡片。</p>
+          </div>
+        </div>
+
+        <div class="quickstart reveal">
+          <aside class="start-copy">
+            <span class="step-badge">01</span>
+            <h3>复制这段话，发给你的 AI。</h3>
+            <p>推荐 Claude Code 或 Codex。仓库同时提供 CLAUDE.md 与 AGENTS.md 两个入口；Hook / Cron 需按本机环境配置后再启用。</p>
+          </aside>
+          <div class="terminal">
+            <div class="terminal-bar">
+              <span class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>MESSAGE_TO_YOUR_AI.txt</span>
+              <button class="copy-btn" type="button" data-copy="ai-prompt">复制</button>
+            </div>
+            <pre id="ai-prompt"><span class="prompt">›</span> 我有一个工作台分享库，请帮我搭建个人知识库。
+
+仓库地址：<span class="command">https://github.com/readercyl/workbench-linkstart</span>
+
+请先克隆到本地，然后读取根目录的 CLAUDE.md 或 AGENTS.md，按照首次启动流程引导我完成初始化。不要一次问太多，先帮我建立人物档案，再写第一张知识卡片。</pre>
+          </div>
+        </div>
+
+        <div class="route reveal" aria-label="三种启动方式">
+          <div class="route-card"><strong>让 AI 带你走</strong><span>适合第一次搭建，少研究配置，直接完成初始化。</span></div>
+          <div class="route-card"><strong>自己克隆研究</strong><span><code>git clone https://github.com/readercyl/workbench-linkstart.git</code></span></div>
+          <div class="route-card"><strong>只采用协作协议</strong><span>先让 AI 读取根协议，再逐步迁移你已有的知识库。</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="repo">
+      <div class="container">
+        <div class="section-head reveal">
+          <p class="section-kicker">08 / Inside The Repo</p>
+          <div>
+            <h2>打开仓库，你会看到这些。</h2>
+            <p class="section-intro">目录按职责组织。根协议管全局，子协议管局部；个人信息、知识、日志、素材和工具各回各位，AI 寻路时不会在一锅文件里捞针。</p>
+          </div>
+        </div>
+
+        <div class="repo-tree reveal">
+          <div class="tree-panel" aria-label="仓库目录树"><pre><span class="tree-accent">workbench-linkstart/</span>
+├── <span class="tree-start">CLAUDE.md</span>          <span class="tree-muted"># AI 入口协议</span>
+├── <span class="tree-start">AGENTS.md</span>          <span class="tree-muted"># Codex 入口协议</span>
+├── 01-关于我/         <span class="tree-muted"># 你的说明书</span>
+├── 02-知识卡片/       <span class="tree-muted"># 卡片 + MOC</span>
+├── 00-运转日志/       <span class="tree-muted"># 存档与复盘</span>
+├── 03-认知工坊/       <span class="tree-muted"># 调研与学习</span>
+├── 04-内容生产/       <span class="tree-muted"># 创作方法</span>
+├── 05-项目运营/       <span class="tree-muted"># 项目执行</span>
+├── 06-对外分享/       <span class="tree-muted"># 输出成果</span>
+├── 素材箱/            <span class="tree-muted"># 原始输入</span>
+└── <span class="tree-accent">AI协作工具/</span>
+    ├── skills/        <span class="tree-muted"># 13 个 Skill</span>
+    └── hooks/         <span class="tree-muted"># 自动化脚本</span></pre></div>
+          <div class="repo-notes">
+            <article class="repo-note"><strong>保留完整系统结构</strong><p>保留真实工作流和配套脚本；人物档案使用模板，知识卡片使用通用示例。</p></article>
+            <article class="repo-note"><strong>AI 无关</strong><p>协作规则写在文件里，兼容能读取仓库并操作文件的 AI 工具。</p></article>
+            <article class="repo-note"><strong>透明可改</strong><p>Skill 是 SOP 文档与脚本，不是看不见的黑盒。你可以按自己的工作方式修改。</p></article>
+            <article class="repo-note"><strong>内容生产仍在实验</strong><p>知识管理链路已经成型，内容生产模块保留框架，仍会继续迭代。</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="faq">
+      <div class="container">
+        <div class="limits reveal">
+          <aside class="limit-title">
+            <p class="section-kicker">09 / Honest Notes</p>
+            <h3>先把边界说清楚，省得把模板当魔法。</h3>
+            <p>它能减少重复解释和系统混乱，但不能替你形成判断。没有真实使用，再漂亮的知识库也只是精装修仓库。</p>
+          </aside>
+          <div class="faq-list">
+            <details open>
+              <summary>这是一个笔记软件吗？</summary>
+              <p>不是。它是一套基于 Markdown 文件、目录协议、Skill 和脚本的协作系统。你可以用 Obsidian 浏览，也可以直接让 Claude Code、Codex 等 AI 工具读取和维护。</p>
+            </details>
+            <details>
+              <summary>需要会编程吗？</summary>
+              <p>不要求。推荐让 AI 完成克隆、初始化和日常文件操作。你需要做的是提供真实背景、判断内容是否准确，并决定哪些知识值得留下。</p>
+            </details>
+            <details>
+              <summary>能直接套在已有知识库上吗？</summary>
+              <p>可以借用协议和维护思路，但不要把旧文件一股脑塞进来。先建立人物档案和入口协议，再挑一小批资料跑通知识编译链路，确认格式适合你后再迁移。</p>
+            </details>
+            <details>
+              <summary>数据会上传到哪里？</summary>
+              <p>仓库本身是本地文件结构。你的实际数据是否同步到 GitHub、云盘或交给模型，取决于你使用的 AI 工具和同步方式。处理敏感信息前，请先检查对应服务的隐私设置。</p>
+            </details>
+            <details>
+              <summary>为什么同时有 CLAUDE.md 和 AGENTS.md？</summary>
+              <p>它们为不同 AI 工具提供根入口，核心协作规则保持一致。Claude Code 优先读取 CLAUDE.md，Codex 读取 AGENTS.md，降低工具迁移成本。</p>
+            </details>
+            <details>
+              <summary>这套系统现在最成熟的部分是什么？</summary>
+              <p>知识管理链路：素材进入、原子卡片、双向链接、检索、存档和体检已经组成完整闭环。内容生产模块目前仍是实验框架，仓库没有把未成熟部分包装成成品。</p>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta container reveal">
+      <div class="cta-card">
+        <p class="eyebrow">READY TO LINK?</p>
+        <h2>你的下一场 AI 对话，不必再从零开始。</h2>
+        <p>克隆仓库，读完协议，填好人物档案，写下第一张卡片。系统会从这一个连接开始，慢慢长成你的外置大脑。</p>
+        <a class="button" href="https://github.com/readercyl/workbench-linkstart">前往 GitHub 仓库 ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <span>工作台分享库 · 人 × AI × 知识库协作方法</span>
+      <nav class="footer-links" aria-label="页脚导航">
+        <a href="README.md">README</a>
+        <a href="CLAUDE.md">协作协议</a>
+        <a href="原理/工作台方法论.md">方法论</a>
+        <a href="https://github.com/readercyl/workbench-linkstart">GitHub</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!reduceMotion && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      document.querySelectorAll('.reveal').forEach((item) => observer.observe(item));
+    } else {
+      document.querySelectorAll('.reveal').forEach((item) => item.classList.add('visible'));
+    }
+
+    document.querySelectorAll('[data-copy]').forEach((button) => {
+      button.addEventListener('click', async () => {
+        const target = document.getElementById(button.dataset.copy);
+        const original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(target.innerText.trim());
+          button.textContent = '已复制';
+        } catch (error) {
+          const range = document.createRange();
+          range.selectNodeContents(target);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          button.textContent = '已选中';
+        }
+        window.setTimeout(() => { button.textContent = original; }, 1800);
+      });
+    });
+  </script>
+</body>
+</html>
